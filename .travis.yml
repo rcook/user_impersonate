@@ -12,4 +12,3 @@ gemfile:
   - Gemfile.rails4
 script:
   - script/test -g $BUNDLE_GEMFILE -n
-
