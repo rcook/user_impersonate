@@ -13,12 +13,14 @@ module UserImpersonate
     # go straight to GET /impersonate/user/123 (create action)
     def index
       users_table = Arel::Table.new(user_table.to_sym) # e.g. :users
-      id_column = users_table[user_id_column.to_sym]   # e.g. users_table[:id]
-      @users = user_class.order("updated_at DESC").
-                    where(
+      @users = user_class.order("updated_at DESC").all
+      if user_class == staff_class
+        id_column = users_table[user_id_column.to_sym]   # e.g. users_table[:id]
+        @users = @users.where(
                       id_column.not_in [
                         current_staff.send(user_id_column.to_sym) # e.g. current_user.id
                       ])
+      end
       if params[:search]
         @users = @users.where("#{user_name_column} like ?", "%#{params[:search]}%")
       end
@@ -144,6 +146,14 @@ module UserImpersonate
     
     def staff_class_name
       config_or_default :staff_class, "User"
+    end
+
+    def staff_class_name
+      config_or_default :staff_class, "User"
+    end
+
+    def staff_class
+      staff_class_name.constantize
     end
 
     def redirect_on_impersonate(impersonated_user)
